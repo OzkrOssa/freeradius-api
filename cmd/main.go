@@ -1,7 +1,15 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"log/slog"
+
+	"github.com/OzkrOssa/freeradius-api/internal/adapter/config"
+)
 
 func main() {
-	fmt.Println("freeradius-api")
+	config, err := config.New()
+	if err != nil {
+		slog.Error("error reading config", "ERROR", err)
+	}
 }
