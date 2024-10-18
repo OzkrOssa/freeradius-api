@@ -5,3 +5,5 @@ version: '3'
 tasks:
   run:
     cmd: air
+  sqlc:
+    cmd: sqlc generate
