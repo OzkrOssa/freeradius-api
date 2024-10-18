@@ -1,0 +1,11 @@
+version: "2"
+cloud:
+  project: "01JAAZAYF1SBJHBVGA0ZXD732V"
+sql:
+  - engine: "mysql"
+    queries: "internal/adapter/storage/mysql/query.sql"
+    schema: "internal/adapter/storage/mysql/schema.sql"
+    gen:
+      go:
+        package: "sqlc"
+        out: "internal/adapter/storage/mysql/sqlc"
