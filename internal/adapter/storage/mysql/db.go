@@ -38,7 +38,3 @@ func New(ctx context.Context, config *config.DB) (*DB, error) {
 
 	return &DB{queries: q}, nil
 }
-
-func (db *DB) Close() {
-	db.Close()
-}

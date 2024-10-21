@@ -27,8 +27,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	defer db.Close()
-
 	slog.Info("Successfully connected to the database", "db", config.DB.Connection)
 
 	cache, err := redis.New(ctx, config.Redis)
