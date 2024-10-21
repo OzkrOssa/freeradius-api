@@ -2,8 +2,41 @@
 
 version: '3'
 
+dotenv:
+  - ".env"
+
 tasks:
   run:
     cmd: air
   sqlc:
     cmd: sqlc generate
+  
+  service:up:
+    cmd: podman compose up -d
+  service:down:
+    cmd: podman compose down
+
+  db:create:
+    cmds:
+      - podman exec -i freeradius_api_mysql sh -c 'mysql -u{{.DB_USER}} -p{{.DB_PASSWORD}} -e "CREATE DATABASE {{.DB_NAME}}"'
+      - podman exec -i freeradius_api_mysql sh -c 'mysql -u{{.DB_USER}} -p{{.DB_PASSWORD}} {{.DB_NAME}}' < /internal/adapter/storage/mysql/schema.sql
+    requires:
+      vars:
+        - DB_USER
+        - DB_NAME
+        - DB_PASSWORD
+  db:drop:
+    cmd: podman exec -i freeradius_api_mysql sh -c 'mysql -u{{.DB_USER}} -p{{.DB_PASSWORD}} -e "DROP DATABASE {{.DB_NAME}}"'
+    requires:
+      vars:
+        - DB_USER
+        - DB_NAME
+        - DB_PASSWORD
+  db:cli:
+    cmd: podman exec -it freeradius_api_mysql sh -c 'mysql -u{{.DB_USER}} -p{{.DB_PASSWORD}} {{.DB_NAME}}'
+    requires:
+      vars:
+        - DB_USER
+        - DB_NAME
+        - DB_PASSWORD
+
