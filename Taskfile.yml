@@ -3,10 +3,65 @@
 version: '3'
 
 vars:
-  GREETING: Hello, World!
+  DSN: "{{.DB_CONNECTION}}://{{.DB_USER}}:{{.DB_PASSWORD}}@{{.DB_HOST}}:{{.DB_PORT}}/{{.DB_NAME}}?sslmode=disable"
+
+dotenv:
+  - ".env"
 
 tasks:
-  default:
+  desc: "Gettings started"
+  cmds:
+    - task: install
+
+  install:
+    desc: "Install dependencies"
     cmds:
-      - echo "{{.GREETING}}"
-    silent: true
+      - go install github.com/go-task/task/v3/cmd/task@latest
+      - go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
+      - go install github.com/vektra/mockery/v2@v2.46.3
+      - go install github.com/air-verse/air@latest
+
+  # Services
+  service:up:
+    desc: "start services on podman"
+    cmd: podman compose up -d
+  service:down:
+    desc: "down services on podman"
+    cmd: podman compose down
+
+  # Database / Migrations
+  db:create:
+    desc: "Create database if not exists"
+    cmd: podman exec -it freeradius-db sh -c "psql -U {{.DB_USER}} -c 'SELECT 1' -d {{.DB_NAME}} &>/dev/null || psql -U {{.DB_USER}} -c 'CREATE DATABASE {{.DB_NAME}};'"
+    requires:
+      vars:
+        - DB_USER
+        - DB_NAME
+
+  db:drop:
+    desc: "Drop database"
+    cmd: podman exec -it freeradius-db sh -c "psql -U {{.DB_USER}} -c 'DROP DATABASE {{.DB_NAME}};'"
+    requires:
+      vars:
+        - DB_USER
+        - DB_NAME
+  db:cli:
+    desc: "Connect to database using command line interface"
+    cmd: podman exec -it freeradius-db sh -c "psql -U {{.DB_USER}} -d {{.DB_NAME}}"
+    requires:
+      vars:
+        - DB_USER
+        - DB_NAME
+  migrate:up:
+    desc: "Run database migrations"
+    cmd: migrate -path ./internal/adapter/storage/postgres/migrations -database {{.DSN}} -verbose up {{.CLI_ARGS}}
+    requires:
+      vars:
+        - DSN
+
+  migrate:down:
+    desc: "Rollback database migrations"
+    cmd: migrate -path ./internal/adapter/storage/postgres/migrations -database {{.DSN}} -verbose down {{.CLI_ARGS}}
+    requires:
+      vars:
+        - DSN
