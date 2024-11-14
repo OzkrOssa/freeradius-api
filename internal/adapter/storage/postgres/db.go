@@ -22,7 +22,7 @@ type DB struct {
 //go:embed migrations/*.sql
 var migrationsFS embed.FS
 
-func New(ctx context.Context, config config.DB) (*DB, error) {
+func New(ctx context.Context, config *config.DB) (*DB, error) {
 	url := fmt.Sprintf("%s://%s:%s@%s:%s/%s?sslmode=disable",
 		config.Connection,
 		config.User,
@@ -36,7 +36,7 @@ func New(ctx context.Context, config config.DB) (*DB, error) {
 		return &DB{}, err
 	}
 
-	err = pool.Ping(context.Background())
+	err = pool.Ping(ctx)
 	if err != nil {
 		return &DB{}, err
 	}
