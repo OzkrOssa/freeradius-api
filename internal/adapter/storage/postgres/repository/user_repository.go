@@ -33,7 +33,7 @@ func (ur UserRepository) CreateUser(ctx context.Context, user *domain.User) (*do
 
 	if err != nil {
 		if errCode := ur.db.ErrorCode(err); errCode == "23505" {
-			return nil, err
+			return nil, domain.DataNotFoundError
 		}
 	}
 
@@ -55,7 +55,7 @@ func (ur UserRepository) GetUserById(ctx context.Context, id uint64) (*domain.Us
 
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, errors.New("user not found")
+			return nil, domain.DataNotFoundError
 		}
 		return nil, err
 	}
@@ -76,7 +76,7 @@ func (ur UserRepository) GetUserByEmail(ctx context.Context, email string) (*dom
 
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, errors.New("user not found")
+			return nil, domain.DataNotFoundError
 		}
 		return nil, err
 	}
@@ -144,7 +144,7 @@ func (ur UserRepository) UpdateUser(ctx context.Context, user *domain.User) (*do
 	err = ur.db.QueryRow(ctx, sql, args...).Scan(&user.ID, &user.Email, &user.Password, &user.CreatedAt, &user.UpdatedAt)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return nil, errors.New("user not found")
+			return nil, domain.DataNotFoundError
 		}
 		return nil, err
 	}
