@@ -30,7 +30,7 @@ func (u UserService) CreateUser(ctx context.Context, user *domain.User) (*domain
 		if errors.Is(err, domain.ConflictDataError) {
 			return nil, err
 		}
-		return nil, domain.ConflictDataError
+		return nil, domain.InternalError
 	}
 
 	key := utils.GenerateCacheKey("user", user.ID)
@@ -54,16 +54,11 @@ func (u UserService) CreateUser(ctx context.Context, user *domain.User) (*domain
 }
 
 func (u UserService) GetUser(ctx context.Context, id uint64) (*domain.User, error) {
+	var user *domain.User
 	cacheKey := utils.GenerateCacheKey("user", id)
 	cachedUser, err := u.cache.Get(ctx, cacheKey)
-	if err != nil {
-		return nil, domain.InternalError
-	}
 
-	var user *domain.User
-
-	if cachedUser != nil {
-		var user *domain.User
+	if err == nil {
 		err := utils.Deserialize(cachedUser, &user)
 		if err != nil {
 			return nil, domain.InternalError
@@ -145,7 +140,7 @@ func (u UserService) UpdateUser(ctx context.Context, user *domain.User) (*domain
 		existingUser.Email == user.Email
 
 	if emptyData || sameData {
-		return nil, domain.ConflictDataError
+		return nil, domain.NoUpdatedDataError
 	}
 
 	var hashedPassword string
@@ -161,7 +156,7 @@ func (u UserService) UpdateUser(ctx context.Context, user *domain.User) (*domain
 
 	_, err = u.repo.UpdateUser(ctx, user)
 	if err != nil {
-		if errors.Is(err, domain.DataNotFoundError) {
+		if errors.Is(err, domain.ConflictDataError) {
 			return nil, err
 		}
 		return nil, domain.InternalError
@@ -198,7 +193,7 @@ func (u UserService) DeleteUser(ctx context.Context, id uint64) error {
 		if errors.Is(err, domain.DataNotFoundError) {
 			return err
 		}
-		return domain.ConflictDataError
+		return domain.InternalError
 	}
 
 	cacheKey := utils.GenerateCacheKey("user", id)
