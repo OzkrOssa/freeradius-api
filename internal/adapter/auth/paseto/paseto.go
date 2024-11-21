@@ -16,7 +16,7 @@ type Token struct {
 	duration time.Duration
 }
 
-func New(config config.Token) (*Token, error) {
+func New(config *config.Token) (*Token, error) {
 	duration, err := time.ParseDuration(config.Duration)
 	if err != nil {
 		return nil, domain.TokenDurationError

@@ -12,7 +12,7 @@ type Redis struct {
 	client *redis.Client
 }
 
-func New(ctx context.Context, config config.Redis) (port.CacheRepository, error) {
+func New(ctx context.Context, config *config.Redis) (port.CacheRepository, error) {
 	options := &redis.Options{
 		Addr:     config.Address + ":" + config.Port,
 		Password: config.Password,
