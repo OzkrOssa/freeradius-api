@@ -22,9 +22,9 @@ func authMiddleware(token port.TokenService) gin.HandlerFunc {
 		isEmpty := len(authorizationHeader) == 0
 		if isEmpty {
 			err := domain.EmptyAuthorizationHeaderError
-			ctx.AbortWithStatusJSON(http.StatusUnauthorized, map[string]interface{}{
-				"error": err.Error(),
-			})
+			errorMessages := parseError(err)
+			errResponse := newErrorResponse(errorMessages)
+			ctx.AbortWithStatusJSON(http.StatusUnauthorized, errResponse)
 			return
 		}
 
@@ -32,27 +32,27 @@ func authMiddleware(token port.TokenService) gin.HandlerFunc {
 		isValid := len(fields) == 2
 		if !isValid {
 			err := domain.InvalidAuthorizationHeaderError
-			ctx.AbortWithStatusJSON(http.StatusUnauthorized, map[string]interface{}{
-				"error": err.Error(),
-			})
+			errorMessages := parseError(err)
+			errResponse := newErrorResponse(errorMessages)
+			ctx.AbortWithStatusJSON(http.StatusUnauthorized, errResponse)
 			return
 		}
 
 		currentAuthorizationType := strings.ToLower(fields[0])
 		if currentAuthorizationType != authorizationType {
 			err := domain.InvalidAuthorizationTypeError
-			ctx.AbortWithStatusJSON(http.StatusUnauthorized, map[string]interface{}{
-				"error": err.Error(),
-			})
+			errorMessages := parseError(err)
+			errResponse := newErrorResponse(errorMessages)
+			ctx.AbortWithStatusJSON(http.StatusUnauthorized, errResponse)
 			return
 		}
 
 		accessToken := fields[1]
 		payload, err := token.VerifyToken(accessToken)
 		if err != nil {
-			ctx.AbortWithStatusJSON(http.StatusUnauthorized, map[string]interface{}{
-				"error": err.Error(),
-			})
+			errorMessages := parseError(err)
+			errResponse := newErrorResponse(errorMessages)
+			ctx.AbortWithStatusJSON(http.StatusUnauthorized, errResponse)
 			return
 		}
 
