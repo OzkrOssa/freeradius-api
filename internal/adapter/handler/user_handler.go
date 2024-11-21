@@ -123,9 +123,9 @@ func (uh *UserHandler) ListUsers(c *gin.Context) {
 }
 
 type updateUserRequest struct {
-	Name     string `json:"name" binding:"omitempty,required" example:"John Doe"`
-	Email    string `json:"email" binding:"omitempty,required,email" example:"test@example.com"`
-	Password string `json:"password" binding:"omitempty,required,min=8" example:"12345678"`
+	Name     string `json:"name" binding:"required" example:"John Doe"`
+	Email    string `json:"email" binding:"required,email" example:"test@example.com"`
+	Password string `json:"password" binding:"required,min=8" example:"12345678"`
 }
 
 func (uh *UserHandler) UpdateUser(c *gin.Context) {
@@ -177,12 +177,14 @@ func (uh *UserHandler) DeleteUser(c *gin.Context) {
 		m := parseError(err)
 		errorResponse := newErrorResponse(m)
 		c.JSON(http.StatusBadRequest, errorResponse)
+		return
 	}
 
 	if err := uh.srv.DeleteUser(c, req.ID); err != nil {
 		m := parseError(err)
 		errorResponse := newErrorResponse(m)
 		c.JSON(http.StatusBadRequest, errorResponse)
+		return
 	}
 
 	response := newResponse(true, "user deleted successfully", nil)
