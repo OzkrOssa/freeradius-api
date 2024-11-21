@@ -14,7 +14,10 @@ type Router struct {
 }
 
 func NewRouter(config *config.Http, token port.TokenService, authHandler *AuthHandler, userHandler *UserHandler) (*Router, error) {
-
+	// Disable debug mode in production
+	if config.Env == "production" {
+		gin.SetMode(gin.ReleaseMode)
+	}
 	ginConfig := cors.DefaultConfig()
 	ginConfig.AllowOrigins = config.AllowedOrigins
 
