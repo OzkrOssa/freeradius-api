@@ -1,12 +1,13 @@
 package handler
 
 import (
+	"log/slog"
+
 	"github.com/OzkrOssa/freeradius-api/internal/adapter/config"
 	"github.com/OzkrOssa/freeradius-api/internal/core/port"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	sloggin "github.com/samber/slog-gin"
-	"log/slog"
 )
 
 type Router struct {
@@ -15,7 +16,7 @@ type Router struct {
 
 func NewRouter(config *config.Http, token port.TokenService, authHandler *AuthHandler, userHandler *UserHandler) (*Router, error) {
 	// Disable debug mode in production
-	if config.Env == "production" {
+	if config.Env == "prod" {
 		gin.SetMode(gin.ReleaseMode)
 	}
 	ginConfig := cors.DefaultConfig()
